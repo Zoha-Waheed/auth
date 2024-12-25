@@ -3,6 +3,10 @@ const apiUrl = 'http://localhost:5000'; // Backend URL
 // Form and list references
 const form = document.getElementById('add-item-form');
 const itemList = document.getElementById('item-list');
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const logoutBtn = document.getElementById('logout-btn');
+const dashboardBtn = document.getElementById('dashboard-btn');
 
 // Fetch and display all items
 const fetchItems = async () => {
@@ -24,7 +28,7 @@ const fetchItems = async () => {
   }
 };
 
-// Handle form submission
+// Handle form submission to add items
 form.addEventListener('submit', async (e) => {
   e.preventDefault(); // Prevent page reload
 
@@ -57,76 +61,85 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-const login = async () => {
-  const response = await fetch('http://localhost:5000/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: 'JohnDoe', password: 'password123' })
-  });
+// Handle login
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-  if (response.ok) {
-    console.log('Login successful!');
-  } else {
-    console.log('Login failed');
-  }
-};
-const registerUser = async () => {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
 
-  const response = await fetch('http://localhost:5000/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
+  try {
+    const response = await fetch(`${apiUrl}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
 
-  const message = await response.text();
-  alert(message);
-};
-
-
-const logout = async () => {
-  const response = await fetch('http://localhost:5000/logout', { method: 'POST' });
-  const message = await response.text();
-  console.log(message);
-};
-
-const isAuthenticated = (req, res, next) => {
-  if (req.session && req.session.userId) {
-    next(); // User is authenticated, proceed
-  } else {
-    res.status(401).send('Unauthorized: Please log in.');
+    if (response.ok) {
+      console.log('Login successful!');
+      logoutBtn.style.display = 'inline-block';
+      dashboardBtn.style.display = 'inline-block';
+      loginForm.style.display = 'none';
+    } else {
+      alert('Login failed');
+    }
+  } catch (error) {
+    console.error('Error logging in:', error);
   }
-};
+});
 
+// Handle registration
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-const authenticateToken = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (!token) {
-    return res.status(401).send('Access denied');
-  }
+  const regUsername = document.getElementById('reg-username').value;
+  const regPassword = document.getElementById('reg-password').value;
 
   try {
-    const verified = jwt.verify(token, 'your-secret-key'); // Replace with your secret key
-    req.user = verified;
-    next();
-  } catch (err) {
-    res.status(400).send('Invalid token');
+    const response = await fetch(`${apiUrl}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: regUsername, password: regPassword }),
+    });
+
+    const result = await response.text();
+    alert(result);
+  } catch (error) {
+    console.error('Error registering user:', error);
+  }
+});
+
+// Handle logout
+const logout = async () => {
+  try {
+    const response = await fetch(`${apiUrl}/logout`, { method: 'POST' });
+    const message = await response.text();
+    console.log(message);
+
+    // Hide logout and dashboard buttons, show login form
+    logoutBtn.style.display = 'none';
+    dashboardBtn.style.display = 'none';
+    loginForm.style.display = 'block';
+  } catch (error) {
+    console.error('Error logging out:', error);
   }
 };
 
-
+// Access dashboard (only if authenticated)
 const accessDashboard = async () => {
-  const response = await fetch('http://localhost:5000/dashboard');
-  const message = await response.text();
+  try {
+    const response = await fetch(`${apiUrl}/dashboard`);
+    const message = await response.text();
 
-  if (response.ok) {
-    alert(message); // Display dashboard content
-  } else {
-    alert('Please log in first!');
+    if (response.ok) {
+      alert(message); // Display dashboard content
+    } else {
+      alert('Please log in first!');
+    }
+  } catch (error) {
+    console.error('Error accessing dashboard:', error);
   }
 };
-
 
 // Load items on page load
 fetchItems();

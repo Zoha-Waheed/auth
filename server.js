@@ -38,6 +38,15 @@ const itemSchema = new mongoose.Schema({
 // Create a model from the schema
 const Item = mongoose.model('Item', itemSchema);
 
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
+
 // Routes
 app.get('/', (req, res) => {
   res.send('Welcome to the backend!');
@@ -47,8 +56,8 @@ app.get('/', (req, res) => {
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
-  // Check for duplicate username
-  const existingUser = users.find(user => user.username === username);
+  // Check for duplicate username in MongoDB
+  const existingUser = await User.findOne({ username });
   if (existingUser) {
     return res.status(400).send('Username already exists');
   }
@@ -58,10 +67,21 @@ app.post('/register', async (req, res) => {
     return res.status(400).send('Password must be at least 6 characters long');
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  users.push({ id: Date.now(), username, password: hashedPassword });
-  res.status(201).send('User registered successfully!');
+  try {
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user and save to the database
+    const newUser = new User({ username, password: hashedPassword });
+    await newUser.save(); // Wait for the save to complete
+
+    res.status(201).send('User registered successfully!');
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).send('Error registering user');
+  }
 });
+
 
 // Login user
 app.post('/login', async (req, res) => {

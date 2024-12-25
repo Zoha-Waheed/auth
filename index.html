@@ -14,21 +14,46 @@
     <form id="add-item-form">
       <label for="name">Item Name:</label>
       <input type="text" id="name" name="name" required>
-      
+
       <label for="quantity">Quantity:</label>
       <input type="number" id="quantity" name="quantity" required>
-      
-      <button type="submit">Add Item</button>
-      <button onclick="registerUser()">Register</button>
-      <button onclick="logout()">Logout</button>
-      <button onclick="accessDashboard()">Access Dashboard</button>
 
+      <button type="submit">Add Item</button>
     </form>
 
     <h2>Inventory List</h2>
     <ul id="item-list">
       <!-- Items will be dynamically added here -->
     </ul>
+
+    <!-- User Authentication Section -->
+    <div id="auth-section">
+      <h3>Authentication</h3>
+
+      <form id="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Login</button>
+      </form>
+
+      <button id="logout-btn" style="display:none" onclick="logout()">Logout</button>
+      <button id="dashboard-btn" style="display:none" onclick="accessDashboard()">Access Dashboard</button>
+      
+      <h3>Register</h3>
+      <form id="register-form">
+        <label for="reg-username">Username:</label>
+        <input type="text" id="reg-username" name="reg-username" required>
+
+        <label for="reg-password">Password:</label>
+        <input type="password" id="reg-password" name="reg-password" required>
+
+        <button type="submit">Register</button>
+      </form>
+    </div>
   </div>
 
   <script src="app.js"></script>
